@@ -1,9 +1,7 @@
 #React Native 从入门到高阶 资料积累
 
-###相关库
+###项目开发常用第三方库
 
-
-###
 
 [感应器IOS](https://github.com/pwmckenna/react-native-motion-manager)
 
@@ -23,6 +21,8 @@
 
 [Radio按钮](https://github.com/moschan/react-native-simple-radio-button )
 
+[checkbox按钮](https://github.com/peng8/react-native-checkbox)
+
 [屏幕截图](https://github.com/gre/react-native-view-shot )
 
 [拍照、相册并剪切](https://github.com/ivpusic/react-native-image-crop-picker)
@@ -30,7 +30,7 @@
 [Toast for Android IOS](https://github.com/crazycodeboy/react-native-easy-toast)
 
 
-###
+
 [下拉框](https://github.com/sohobloo/react-native-modal-dropdown)
 
 [IOS选择列表](https://github.com/eyaleizenberg/react-native-custom-action-sheet)
@@ -83,6 +83,8 @@
 + IOS模拟器弹出键盘：需要勾选 Hardware -> Keyboard -> Toggle Software keyboard
 
 + 当前设备的最小线宽: 1/PixelRatio.get() 
+
++ 强烈建议样式与组件写在同一文件中
 
 
 
@@ -142,9 +144,9 @@ var {xxx} = './filepath';
 ####常想不到的冷属性
 
 
-+ TextInput中省略号属性： ellipsizeMode , 最新版本推出的属性, 显示不完全省略的位置, 一般配合numberOfLines 使用。 可选值'head', 'middle', 'tail', 'clip'， clip 只能在ios中使用, tail是默认值, 省略尾巴 显示方式如:”abcd…”
++ Text中省略号属性： ellipsizeMode , 最新版本推出的属性, 显示不完全省略的位置, 一般配合numberOfLines 使用。 可选值'head', 'middle', 'tail', 'clip'， clip 只能在ios中使用, tail是默认值, 省略尾巴 显示方式如:”abcd…”
 
-+
+
 
 
 
@@ -198,16 +200,6 @@ IOS   我在此处不使用catch处理错误，控制台会一直报Unhandled pr
 
 
 
-
-http://lib.csdn.net/article/react/25126  React Native 添加自定义UI组件
-http://blog.sina.com.cn/s/blog_4e1e357d0102yug0.html 如何自定义封装一个ReactNativeAndroid 的 NativeModule组件
-http://www.lcode.org/react-native%e5%ae%9e%e6%88%98%e7%b3%bb%e5%88%97%e6%95%99%e7%a8%8b%e4%b9%8b%e8%87%aa%e5%ae%9a%e4%b9%89%e5%8e%9f%e7%94%9fui%e7%bb%84%e4%bb%b6%e5%92%8cvideoview%e8%a7%86%e9%a2%91%e6%92%ad%e6%94%be/   React Native实战系列教程之自定义原生UI组件和VideoView视频播放器开发
-
-http://blog.csdn.net/guohesheng/article/details/52213705 第三方截图
-
-
-
-
 ###关于布局
 
 ```
@@ -221,8 +213,7 @@ static getFontScale()返回字体大小的缩放因子
 3、 单位 dp 转换成 px
 
 static getPixelSizeForLayoutSize(layoutSize:number)
-1
-在UI开发的过程中最长使用到的方法
+
 
 自适应布局方案
 自适应布局方案采用了，将 UI 等比放大到 app 上的自适应布局。
@@ -264,4 +255,191 @@ iPhone 6 plus
     xxhdpi Android devices (480 dpi)
 PixelRatio.get() === 3.5
     Nexus 6
+```
+
+
+###开发规范
+
+
+###关于原生组件的封装
+
++ [自定义原生UI组件和VideoView视频播放器开发](http://www.lcode.org/react-native%e5%ae%9e%e6%88%98%e7%b3%bb%e5%88%97%e6%95%99%e7%a8%8b%e4%b9%8b%e8%87%aa%e5%ae%9a%e4%b9%89%e5%8e%9f%e7%94%9fui%e7%bb%84%e4%bb%b6%e5%92%8cvideoview%e8%a7%86%e9%a2%91%e6%92%ad%e6%94%be/)
+
++ [添加自定义UI组件](http://lib.csdn.net/article/react/25126)
+
++ [封装一个ReactNativeAndroid 的 NativeModule组件](http://blog.sina.com.cn/s/blog_4e1e357d0102yug0.html)
+
+
+###组件封装步骤
+
+
+自定义属性(attr、children)
+
+1、View原属性继承：...View.propTypes
+
+2、声明自定义属性类型
+
+3、属性默认值
+
+4、获取属性 this.props.xxx 及 this.props.children
+
+
+#####ES5
+```
+React.createClass({
+
+  propTypes: {
+    //一、要求属性是JavaScript基本类型
+    // 默认情况下，这些 prop 都是可传可不传的
+    optionalArray: React.PropTypes.array,
+    optionalBool: React.PropTypes.bool,
+    optionalFunc: React.PropTypes.func,
+    optionalNumber: React.PropTypes.number,
+    optionalObject: React.PropTypes.object,
+    optionalString: React.PropTypes.string,
+
+    // 二、要求属性是可渲染节点(数字，字符串，DOM 元素或包含这些类型的数组)
+    optionalNode: React.PropTypes.node,
+
+    // 三、要求属性是某个React元素
+    optionalElement: React.PropTypes.element,
+
+    // 四、要求属性是某个指定类的实例
+    optionalMessage: React.PropTypes.instanceOf(Message),
+
+    // 五、要求属性取值为几个特定的值
+    optionalEnum: React.PropTypes.oneOf(['News', 'Photos']),
+
+    // 六、属性可以为指定类型中的任意一个
+    optionalUnion: React.PropTypes.oneOfType([
+      React.PropTypes.string,
+      React.PropTypes.number,
+      React.PropTypes.instanceOf(Message)
+    ]),
+
+
+    // 七、指定类型组成的数组
+    optionalArrayOf: React.PropTypes.arrayOf(React.PropTypes.number),
+
+    // 八、指定类型的属性构成的对象
+    optionalObjectOf: React.PropTypes.objectOf(React.PropTypes.number),
+
+    // 九、特定形状参数的对象
+    optionalObjectWithShape: React.PropTypes.shape({
+      color: React.PropTypes.string,
+      fontSize: React.PropTypes.number
+    }),
+
+    // 十、任意类型
+    optionAny: React.PropTypes.any
+
+    // 十一、非空限定（在类型后加上 `isRequired`）
+    requiredFunc: React.PropTypes.func.isRequired,
+    requiredAny: React.PropTypes.any.isRequired,
+
+  
+
+    // 自定义验证器。不要直接使用 `console.warn` 或抛异常，因为这样 `oneOfType` 会失效。 
+    customProp: function(props, propName, componentName) {
+      if (!/matchme/.test(props[propName])) {
+        return new Error('Validation failed!');
+      }
+    }
+  },
+
+  // 十二、属性默认值（此属性isRequired要去掉）
+  getDefaultProps: function(){
+      promptToUser: '确定吗?'
+  }
+});
+
+```
+
+#####ES6
+```
+class Demo extends Component {
+
+  static propTypes = {
+    // 继承View属性
+    ...View.propTypes,
+    //一、要求属性是JavaScript基本类型(默认情况下，这些 prop 都是可传可不传的。)
+    optionalArray: PropTypes.array,
+    optionalBool: PropTypes.bool,
+    optionalFunc: PropTypes.func,
+    optionalNumber: PropTypes.number,
+    optionalObject: PropTypes.object,
+    optionalString: PropTypes.string,
+
+    // 二、要求属性是可渲染节点(数字，字符串，DOM 元素或包含这些类型的数组)
+    optionalNode: PropTypes.node,
+
+    // 三、要求属性是某个React元素
+    optionalElement: PropTypes.element,
+
+    // 四、要求属性是某个指定类的实例
+    optionalMessage: PropTypes.instanceOf(Message),
+
+    // 五、要求属性取值为几个特定的值
+    optionalEnum: PropTypes.oneOf(['News', 'Photos']),
+
+    // 六、属性可以为指定类型中的任意一个
+    optionalUnion: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.number,
+      PropTypes.instanceOf(Message)
+    ]),
+
+
+    // 七、指定类型组成的数组
+    optionalArrayOf: PropTypes.arrayOf(PropTypes.number),
+
+    // 八、指定类型的属性构成的对象
+    optionalObjectOf: PropTypes.objectOf(PropTypes.number),
+
+    // 九、特定形状参数的对象
+    optionalObjectWithShape: PropTypes.shape({
+      color: PropTypes.string,
+      fontSize: PropTypes.number
+    }),
+
+    // 十、任意类型
+    optionAny: PropTypes.any
+
+    // 十一、非空限定（在类型后加上 `isRequired`）
+    requiredFunc: PropTypes.func.isRequired,
+    requiredAny: PropTypes.any.isRequired,
+
+  
+
+    // 自定义验证器。不要直接使用 `console.warn` 或抛异常，因为这样 `oneOfType` 会失效。 
+    customProp: function(props, propName, componentName) {
+      if (!/matchme/.test(props[propName])) {
+        return new Error('Validation failed!');
+      }
+    }
+  };
+
+  // 十二、属性默认值（此属性isRequired要去掉）
+  static defaultProps = {
+      promptToUser: '确定吗?'
+  };
+}
+```
+
+###子节点是节点的属性
+
+```
+React.Children.map(this.props.children, function (child) {
+  return {...child}
+})
+
+1. React.Children.map(object children, function fn [, object context])
+----遍历子元素，映射为一个新的子元素集合（跟 ES5 的 Array.map 差不多）
+2. React.Children.forEach(object children, function fn [, object context])
+----遍历子元素，对每一个子元素执行回调，但不像上述的 map 那样最终返回一个新的集合（跟 ES5 的 Array.forEach 差不多）
+3. React.Children.count(object children)
+----返回子元素的总数
+4. React.Children.only(object children)
+----返回仅有的一个子元素，否则（没有子元素或超过一个子元素）报错且不渲染任何东西
+
 ```

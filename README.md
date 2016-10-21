@@ -1,7 +1,7 @@
 #React Native 从入门到高阶 资料积累
 
 
-
+[一切从官方](http://facebook.github.io/react-native/docs/getting-started.html)
 
 
 ####使用View接受触屏控件
@@ -125,6 +125,201 @@ signingConfigs{
 
 
 
+###原生调用(原生模块调用、原生UI调用)
+
+
+一、[调用原生](http://blog.csdn.net/woaini705/article/details/50899946)
+```
+一，继承 ReactContextBaseJavaModule 实现如下方法  自定义方法用 @ReactMethod注释
+/**
+            * 日志打印module
+    * Created by ybj on 2016/2/26.
+            */
+    public class ReactLogModule extends ReactContextBaseJavaModule {
+        private static final String MODULE_NAME="Log";
+    private static final String TAG_KEY = "TAG";
+    private static final String TAG_VALUE = "LogModule";
+
+    public ReactLogModule(ReactApplicationContext reactContext) {
+        super(reactContext);
+    }
+
+    @Override
+    public String getName() {
+        return MODULE_NAME;
+    }
+    @ReactMethod
+    public  void  d(String tag,String message){
+        Log.d(tag,message);
+       /* WritableMap params = Arguments.createMap();
+        params.putString("TAG",tag);
+        params.putString("MSG",message);
+        getReactApplicationContext()
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit("logInConsole", params);//对应的javascript层的事件名为logInConsole，注册该事件即可进行回调*/
+    }
+
+    @Override
+    public Map<String, Object> getConstants() {
+        final Map<String,Object> constants= MapBuilder.newHashMap();
+        constants.put(TAG_KEY,TAG_VALUE);
+        return constants;
+    }
+}
+二，继承ReactPackage，实现如下
+
+/**
+ * 日志打印 需要打印日志注册this
+ * Created by ybj on 2016/2/26.
+ */
+public class ReactLogPackage implements ReactPackage {
+
+
+    @Override
+    public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
+        List<NativeModule> modules=new ArrayList<NativeModule>();
+        ReactLogModule reactLogModule=new ReactLogModule(reactContext);
+        modules.add(reactLogModule);
+        return modules;
+    }
+
+    @Override
+    public List<Class<? extends JavaScriptModule>> createJSModules() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
+        return Collections.emptyList();
+    }
+}
+三 添加package
+mReactInstanceManager = ReactInstanceManager.builder()
+        .setApplication(((Activity) mContext).getApplication())
+
+        .setJSBundleFile(bundleFile)
+                //  .setJSMainModuleName("test")
+        .setNativeModuleCallExceptionHandler(new NativeModuleCallExceptionHandler() {
+            @Override
+            public void handleException(Exception e) {
+            }
+        })
+        .addPackage(new MainReactPackage())
+        .addPackage(new ReactLogPackage())
+       
+
+        .setUseDeveloperSupport(false)
+        .setInitialLifecycleState(LifecycleState.RESUMED)
+        .build();
+mReactRootView.startReactApplication(mReactInstanceManager, "OperationActivity", null);
+```
+
+
+
+二、[调用原生组件](http://blog.csdn.net/woaini705/article/details/50900034)
+
+```
+**
+ * 图片加载控件
+ * Created by ybj on 2016/2/24.
+ */
+public class ReactImageManager extends SimpleViewManager<ReactImageView> {
+    public static final String REACT_CLASS = "RCTTBImage";
+    @Override
+    public String getName() {
+        return REACT_CLASS;
+    }
+    @Override
+    protected ReactImageView createViewInstance(ThemedReactContext reactContext) {
+       // ReactImageView imageView=  new ReactImageView(reactContext);
+        ReactImageView imageView = new ReactImageView(reactContext, Fresco.newDraweeControllerBuilder(), null);
+        imageView.setScaleType(ImageView.ScaleType.FIT_XY);
+
+        return imageView;
+    }
+/*
+    @ReactProp(name = PROP_TEST_ID)
+    @Override
+    public void setTestId(ImageView view, int testId) {
+        super.setTestId(view, testId);
+    }
+*/
+
+   //图片url设置
+    @ReactProp(name = "urlPath")
+    public void setUrlPath(ReactImageView view,@Nullable String url) {
+        Log.d("TAG_YBJ", "setUrl" + url);
+        if (url.toLowerCase().endsWith(".gif")) {
+           /* DraweeController controller = Fresco.newDraweeControllerBuilder().setUri(url)
+                    .setAutoPlayAnimations(true).build();
+            this.setController(controller);*/
+
+        } else {
+            /*this.setImageURI(Uri.parse(url));*/
+        }
+        view.setSource(url);
+      //  Image13lLoader.getInstance().loadImage(url,view);
+    }
+    //边角度数设置
+    @ReactProp(name = "borderRadius", defaultFloat = 0f)
+    public void setBorderRadius(ReactImageView view, float borderRadius) {
+        view.setBorderRadius(borderRadius);
+    }
+    //缩放类型
+    @ReactProp(name = ViewProps.RESIZE_MODE)
+    public void setResizeMode(ReactImageView view, @Nullable String resizeMode) {
+        view.setScaleType(ImageResizeMode.toScaleType(resizeMode));
+    }
+
+}
+二，实现 ReactPackage
+/**
+ * 图片加载 需要加载图片需要注册this
+ * Created by ybj on 2016/2/24.
+ */
+        public class ReactImagePackage implements ReactPackage {
+            @Override
+            public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public List<Class<? extends JavaScriptModule>> createJSModules() {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
+                return Arrays.<ViewManager>asList(
+                        new ReactImageManager());
+
+    }
+}
+三，添加package
+        .setApplication(((Activity) mContext).getApplication())
+        .setJSBundleFile(bundleFile)
+                //  .setJSMainModuleName("test")
+        .setNativeModuleCallExceptionHandler(new NativeModuleCallExceptionHandler() {
+            @Override
+            public void handleException(Exception e) {
+            }
+        })
+      /* .setBundleAssetName("webviewindex.bundle")
+        .setJSMainModuleName("webviewindex")*/
+        .addPackage(new TBRnPackage())
+
+        .addPackage(new ReactImagePackage())
+
+        .setUseDeveloperSupport(false)
+        .setInitialLifecycleState(LifecycleState.RESUMED)
+        .build();
+mReactRootView.startReactApplication(mReactInstanceManager, "BZMHomeOperationActivity", null);
+
+myreact.addView(mReactRootView);
+```
+
+
+
 
 
 
@@ -151,6 +346,9 @@ signingConfigs{
 
 
 ###项目开发常用第三方库
+
+
+
 
 
 [感应器IOS、](https://github.com/pwmckenna/react-native-motion-manager)
@@ -181,6 +379,9 @@ signingConfigs{
 [IOS摇一摇、](https://cnpmjs.org/package/react-native-shake-event-ios)
 [常用图标、](https://github.com/corymsmith/react-native-icons)
 [强大的表单处理控件、](https://github.com/gcanti/tcomb-form-native )
+[高德定位](https://github.com/xiaobuu/react-native-amap-location)
+[Device Info](https://github.com/rebeccahughes/react-native-device-info)
+
 
 
 
@@ -196,7 +397,26 @@ signingConfigs{
 [blog项目、](https://github.com/togayther/react-native-cnblogs)
 [知呼、](https://github.com/race604/ZhiHuDaily-React-Native)
 [贷贷助手客户端、](https://github.com/liuhongjun719/react-native-DaidaiHelperNew)
-
+[官方演示App ](https://github.com/facebook/react-native/tree/master/Examples)
+[ReactNativeRubyChina ](https://github.com/henter/ReactNativeRubyChina)
+[HackerNews-React-Native ](https://github.com/iSimar/HackerNews-React-Native)
+[React-Native新闻客户端 ](https://github.com/tabalt/ReactNativeNews)
+[newswatch(新闻客户端) ](https://github.com/bradoyler/newswatch-react-native)
+[buyscreen(购买页面) ](https://github.com/appintheair/react-native-buyscreen)
+[V2EX客户端]( https://github.com/samuel1112/v2er)
+[react-native-todo ](https://github.com/joemaddalone/react-native-todo)
+[react-native-beer ](https://github.com/muratsu/react-native-beer)
+[react-native-stars ](https://github.com/86/react-native-stars)
+[模仿天猫首页的app ](https://github.com/baofen14787/react-native-demo)
+[ReactNativeChess ](https://github.com/csarsam/ReactNativeChess)
+[react native 编写的音乐软件 ](https://github.com/Johnqing/miumiu)
+[react-native-pokedex ](https://github.com/ababol/react-native-pokedex)
+[CNode-React-Native ](https://github.com/SFantasy/CNode-React-Native)
+[8tracks电台客户端 ](https://github.com/voronianski/EightTracksReactNative)
+[React-Native实现的计算器 ](https://github.com/yoxisem544/Calculator-using-React-Native)
+[房产搜索app ](https://github.com/jawee/react-native-PropertyFinder)
+[知乎专栏app ](https://github.com/LeezQ/react-native-zhihu-app)
+[ForeignExchangeApp ](https://github.com/peralmq/ForeignExchangeApp)
 
 ###开发技巧
 

@@ -1,71 +1,201 @@
 #React Native 从入门到高阶 资料积累
 
+
+
+
+
+####使用View接受触屏控件
+
+```
+
+1、定义
+componentWillMount(){
+    this._panResponder = PanResponder.create({
+        onStartShouldSetPanResponder: (evt, gestureState) => true,
+        onMoveShouldSetPanResponder: (evt, gestureState) => true,
+        onPanResponderGrant: this._handlePanResponderGrant,
+        onPanResponderMove: this._handlePanResponderMove,
+        onPanResponderRelease: this._handlePanResponderEnd,
+        onPanResponderTerminate: this._handlePanResponderEnd,
+    })
+}
+
+2、调用
+{...this._panResponder.panHandlers}
+
+3、属性解释
+
+View.props.onStartShouldSetResponder：用户开始触摸屏幕的时候，是否愿意成为响应者[默认false,冒泡传递]；
+View.props.onMoveShouldSetResponder：在每一个触摸点开始移动的时候，再询问一次是否响应触摸交互；
+View.props.onResponderGrant：要开始响应触摸事件了；
+View.props.onResponderReject：响应者现在另有其人，而且暂时不会放权，另作安排；
+View.props.onResponderMove：用户正在屏幕上移动手指；
+View.props.onResponderRelease：触摸操作结束收触发；
+View.props.onResponderTerminationRequest：有其它组件请求接替响应者，当前View是否放权；
+View.props.onResponderTerminate：响应权已经交出；
+
+4、回调evt参数
+changedTouches:[]
+identifier:int
+locationX:float
+localtionY:float
+pageX:float
+pageY:float
+target:int
+timestamp:float(cal speed)
+touches:[]
+
+```
+
+###[Navigator:路由](http://blog.csdn.net/tiem_erhu/article/details/51089482)
+
+```
+如果你得到了一个navigator对象的引用，则可以调用许多方法来进行导航： 
+getCurrentRoutes() - 获取当前栈里的路由，也就是push进来，没有pop掉的那些 
+jumpBack() - 跳回之前的路由，当然前提是保留现在的，还可以再跳回来，会给你保留原样 
+jumpForward() - 进行跳转到相当于当前页面的下一个页面 
+jumpTo(route) - 根据传入的路由信息，跳转到一个指定的路由，并且不卸载 
+push(route) - 导航切换到一个新的页面，新的页面会进入栈中，可以使用jumpfonward()跳转回去 
+pop() - 当前页面弹出栈，跳转下一个页面，并且卸载掉当前场景 
+replace(route) - 使用传入的路由的指定页面替换掉当前场景 
+replaceAtIndex(route, index) - 传入路由以及位置索引，使用该路由指 定的页面跳转到指定位置的页面 
+replacePrevious(route) - 传入路由，通过指定路由替换前一个页面 
+immediatelyResetRouteStack(routeStack) - 用新的路由数组来重置路由栈 
+popToRoute(route) - pop，弹出相关页面，跳转到路由指定的页面，弹出的页面会被删除 
+popToTop() - pop，弹出页面，导航到栈找中的第一个页面，弹出来的所有页面都被卸载 
+resetTo(route) -进行导航到新的页面，并且重置整个路由栈
+
+```
+
+[打包一：](http://www.jianshu.com/p/32a99c273be1)
+
+[打包二：](http://www.jianshu.com/p/32a99c273be1)
+
+1.执行react-native init androiddemo（根据实际情况来创建）项目。
+2.在androiddemo目录中找到路径/android/app/src/main，并在该目录下新建《assets》文件夹，这个文件夹存放android app的资源文件。
+3.在/androiddemo/路径下执行react-native start命令，待执行完毕以后再执行以下命令
+curl -k http://localhost:8081/index.android.bundle > android/app/src/main/assets/index.android.bundle
+该命令的意思是将index.android.bundle下载并保存到assets资源文件夹中
+这句命令是重点，如果assets目录中不存在该文件，则打包的apk在执行时显示空白。
+4.打包的apk在未签名的情况下,在手机中（非root）是不允许安装的，所以需要添加gradle的android keystore配置，
+
+生成key...
+keytool ~  jdk_xx/jre/bin/keytool
+
+1、执行
+[keytool -genkey -alias mykey -keyalg RSA -validity 40000 -keystore demo.keystore](http://jingyan.baidu.com/article/59703552e877f98fc00740f0.html)
+
+#####说明：
+-genkey 产生密钥
+
+-alias mykey 别名 mykey
+
+-keyalg RSA 使用RSA算法对签名加密
+
+-validity 40000 有效期限4000天
+
+-keystore demo.keystore
+
+```
+在build.gradle文件中，具体配置如下
+  //签名
+signingConfigs{
+    release {
+        storeFile file("/Volumes/Android.KeyStore/AndroidDebug.keystore")
+        storePassword "密码"
+        keyAlias "keyAlias的名字"
+        keyPassword "密码"
+    }
+}
+ buildTypes {
+    release {
+        minifyEnabled false
+        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        signingConfig signingConfigs.release //添加这句话引用签名配置
+    }
+}
+```
+注意一下配置顺序
+5.在androiddemo/android/目录中执行gradle assembleRelease命令，打包后的文件在    androiddemoi/android/app/build/outputs/apk目录中，例如app-release.apk。如果打包碰到    问题可以先执行 gradle clean 清理一下。
+6.将apk复制到手机中安装运行 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ###项目开发常用第三方库
 
 
-[感应器IOS](https://github.com/pwmckenna/react-native-motion-manager)
-
-[感应器Android](https://github.com/kprimice/react-native-sensor-manager)
-
-[仿IOS Picker-ok](https://github.com/beefe/react-native-picker)
-
-[选择列表框](https://github.com/d-a-n/react-native-modal-picker)
-
-[仿IOS Picker-稍差](https://github.com/lesliesam/react-native-wheel-picker)
-
-[音频](https://github.com/jsierles/react-native-audio)
-
-[视频](https://github.com/react-native-community/react-native-video)
-
-[地图](https://github.com/lelandrichardson/react-native-maps)
-
-[Radio按钮](https://github.com/moschan/react-native-simple-radio-button )
-
-[checkbox按钮](https://github.com/peng8/react-native-checkbox)
-
-[屏幕截图](https://github.com/gre/react-native-view-shot )
-
-[拍照、相册并剪切](https://github.com/ivpusic/react-native-image-crop-picker)
-
-[Toast for Android IOS](https://github.com/crazycodeboy/react-native-easy-toast)
+[感应器IOS、](https://github.com/pwmckenna/react-native-motion-manager)
+[感应器Android、](https://github.com/kprimice/react-native-sensor-manager)
+[仿IOS Picker-ok、](https://github.com/beefe/react-native-picker)
+[选择列表框、](https://github.com/d-a-n/react-native-modal-picker)
+[仿IOS Picker-稍差、](https://github.com/lesliesam/react-native-wheel-picker)
+[音频、](https://github.com/jsierles/react-native-audio)
+[视频、](https://github.com/react-native-community/react-native-video)
+[地图、](https://github.com/lelandrichardson/react-native-maps)
+[Radio按钮、](https://github.com/moschan/react-native-simple-radio-button )
+[checkbox按钮、](https://github.com/peng8/react-native-checkbox)
+[屏幕截图、](https://github.com/gre/react-native-view-shot )
+[拍照、相册并剪切、](https://github.com/ivpusic/react-native-image-crop-picker)
+[Toast for Android IOS、](https://github.com/crazycodeboy/react-native-easy-toast)
+[可滑动的Tab控制器、](https://github.com/skv-headless/react-native-scrollable-tab-view)
 
 
 
-[下拉框](https://github.com/sohobloo/react-native-modal-dropdown)
-
-[IOS选择列表](https://github.com/eyaleizenberg/react-native-custom-action-sheet)
-
-[仿QQ向滑动删除](https://github.com/dancormier/react-native-swipeout)
-
-[ios&Android系统分享](https://github.com/EstebanFuentealba/react-native-share )
-
-[微信SDK集成示例](https://github.com/beefe/react-native-wechat-ios)
-
-[微信SDK集成示例](https://github.com/beefe/react-native-wechat-android)
-
-[微信SDK集成示例](https://github.com/beefe/react-native-wechat-android/wiki/%E5%85%BC%E5%AE%B9iOS )
-
-[第三方登录微博QQ免费，微信收费](https://github.com/ParryQiu/react-native-open-share)
-
-[IOS摇一摇](https://cnpmjs.org/package/react-native-shake-event-ios)
-
-[常用图标](https://github.com/corymsmith/react-native-icons)
-
-[强大的表单处理控件](https://github.com/gcanti/tcomb-form-native )
-
-[ios&Android 股票](https://github.com/7kfpun/FinanceReactNative)
-
-[韩剧影视APP](https://github.com/helengray/XiFan)
-
-[react native项目列表](https://react.parts/native reactNative)
-
-[React/Native/webpack项目](https://js.coach)
-
-[React Native常见错误](http://blog.csdn.net/goodchangyong/article/details/51323930) 
-
-[最接近原生APP体验的高性能框架](https://github.com/dcloudio/mui/tree/master/examples/hello-mui)
+[下拉框、](https://github.com/sohobloo/react-native-modal-dropdown)
+[IOS选择列表、](https://github.com/eyaleizenberg/react-native-custom-action-sheet)
+[仿QQ向滑动删除、](https://github.com/dancormier/react-native-swipeout)
+[ios&Android系统分享、](https://github.com/EstebanFuentealba/react-native-share )
+[微信SDK集成示例、](https://github.com/beefe/react-native-wechat-ios)
+[微信SDK集成示例、](https://github.com/beefe/react-native-wechat-android)
+[微信SDK集成示例、](https://github.com/beefe/react-native-wechat-android/wiki/%E5%85%BC%E5%AE%B9iOS )
+[第三方登录微博QQ免费，微信收费、](https://github.com/ParryQiu/react-native-open-share)
+[IOS摇一摇、](https://cnpmjs.org/package/react-native-shake-event-ios)
+[常用图标、](https://github.com/corymsmith/react-native-icons)
+[强大的表单处理控件、](https://github.com/gcanti/tcomb-form-native )
 
 
+
+[react native项目列表、](https://react.parts/native reactNative)
+[React/Native/webpack项目、](https://js.coach)
+[React Native常见错误、](http://blog.csdn.net/goodchangyong/article/details/51323930) 
+[最接近原生APP体验的高性能框架、](https://github.com/dcloudio/mui/tree/master/examples/hello-mui)
+
+
+[ios&Android 股票、](https://github.com/7kfpun/FinanceReactNative)
+[韩剧影视APP、](https://github.com/helengray/XiFan)
+[OA项目、](https://github.com/talentjiang/react_native_office)
+[blog项目、](https://github.com/togayther/react-native-cnblogs)
+[知呼、](https://github.com/race604/ZhiHuDaily-React-Native)
+[贷贷助手客户端、](https://github.com/liuhongjun719/react-native-DaidaiHelperNew)
 
 
 ###开发技巧
@@ -137,7 +267,7 @@ exports.xxx = ...;
 
 调用
 
-var {xxx} = './filepath';
+var {xxx} = require('./filepath');
 
 ```
 

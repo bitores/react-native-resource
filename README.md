@@ -358,6 +358,7 @@ myreact.addView(mReactRootView);
 [仿IOS Picker-稍差、](https://github.com/lesliesam/react-native-wheel-picker)
 [音频、](https://github.com/jsierles/react-native-audio)
 [视频、](https://github.com/react-native-community/react-native-video)
+[百度地图](https://github.com/lovebing/react-native-baidu-map)
 [地图、](https://github.com/lelandrichardson/react-native-maps)
 [Radio按钮、](https://github.com/moschan/react-native-simple-radio-button )
 [checkbox按钮、](https://github.com/peng8/react-native-checkbox)
@@ -384,7 +385,7 @@ myreact.addView(mReactRootView);
 
 
 
-
+[Android使用gif问题](http://blog.csdn.net/codetomylaw/article/details/52692824)
 [react native项目列表、](https://react.parts/native reactNative)
 [React/Native/webpack项目、](https://js.coach)
 [React Native常见错误、](http://blog.csdn.net/goodchangyong/article/details/51323930) 
@@ -498,6 +499,14 @@ var {xxx} = require('./filepath');
 
 
 
+
+#####[Android 使用 GIF](http://blog.csdn.net/codetomylaw/article/details/52692824)
+```
+在build.gradle 中加入：
+compile 'com.facebook.fresco:animated-gif:0.13.0'
+然后就可以直接使用了，对，就这么简单。
+<Image source={{uri:loadgif}} style={{width:20,height:20}}/>
+```
 
 
 #####[ScrollView中按钮反应慢](http://www.cnblogs.com/pofabs/p/5109021.html)

@@ -26,22 +26,41 @@
 
 
 ###常用类
->
-1、上下文
-import com.facebook.react.bridge.ReactApplicationContext;
->
-2、原生模块
-import com.facebook.react.bridge.NativeModule;
->
-3、
-import com.facebook.react.bridge.JavaScriptModule;
->
-4、原生UI
-import com.facebook.react.uimanager.ViewManager;
-
-
 import com.facebook.react.ReactPackage;
+import com.facebook.react.bridge.ReactApplicationContext;
 
+
+import com.facebook.react.uimanager.SimpleViewManager;
+import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.uimanager.annotations.ReactProp;
+
+import com.facebook.react.bridge.NativeModule;
+import com.facebook.react.uimanager.ViewManager;
+import com.facebook.react.bridge.JavaScriptModule;
+
+import com.facebook.react.bridge.ReadableArray;
+import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.WritableNativeArray;
+import com.facebook.react.bridge.WritableNativeMap;
+
+import com.facebook.react.common.MapBuilder;
+
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Callback;
+import com.facebook.react.bridge.Promise;
+
+
+import javax.annotation.Nullable;
+
+@ReactProp(name="maxVisibleValueCount",defaultInt = 50)
+
+@ReactMethod
+
+使用Promise比使用Callback更加的简洁，还能更加灵活的在多线程之间进行切换
+
+Promise 一般在 NativeModule, Callback 一般在 ViewManager
 
 ### 自定义Package
 + createNativeModules 实现原生模块

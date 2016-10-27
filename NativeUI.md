@@ -245,6 +245,27 @@ public Map getExportedCustomDirectEventTypeConstants() {
 onChoosed={(e)=>{
     console.log(e.nativeEvent.data);
 }}
+
+
+或
+
+@Override
+public Map<String, Object> getExportedCustomDirectEventTypeConstants() {
+    MapBuilder.Builder<String, Object> builder = MapBuilder.builder();
+    for (VideoEvent event:VideoEvent.values()){
+        builder.put(event.toString(),MapBuilder.of("registrationName", event.toString()));
+    }
+    return builder.build();
+}
+
+private void dispatchEvent(String eventName,WritableMap eventData){
+    ReactContext reactContext = (ReactContext) getContext();
+    reactContext.getJSModule(RCTEventEmitter.class).receiveEvent(
+            getId(),//native和js两个视图会依据getId()而关联在一起
+            eventName,//事件名称
+            eventData
+    );
+}
 ```
 
 

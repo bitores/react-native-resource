@@ -161,3 +161,165 @@ public class MainPackage implements ReactPackage {
     }
 }
 ```
+
+> js调用
+
+```
+var CircleView = requireNativeComponent("CircleView",{
+  name:"CircleView", // 用于调试信息显示
+  propTypes: {       // 重要：它定义了该组件拥有哪些属性可以使用
+    ...View.propTypes
+  }
+});
+```
+
+>原生UI中的回调实现
+
+```
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.ReactContext;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.uimanager.UIManagerModule;
+import com.facebook.react.uimanager.events.Event;
+import com.facebook.react.uimanager.events.EventDispatcher;
+import com.facebook.react.uimanager.events.RCTEventEmitter;
+
+...
+
+private final EventDispatcher mEventDispatcher;
+
+...
+
+mEventDispatcher = reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher();
+
+...
+
+mEventDispatcher.dispatchEvent(new ItemSelectedEvent(getId(), mCenterPaint.getColor()));
+
+...
+
+class ItemSelectedEvent extends Event<ItemSelectedEvent> {
+
+    public static final String EVENT_NAME = "xxxxx";
+
+    private final int mValue;
+
+    protected ItemSelectedEvent(int viewTag,  int value) {
+        super(viewTag);
+        mValue = value;
+    }
+
+    @Override
+    public String getEventName() {
+        return EVENT_NAME;
+    }
+
+    @Override
+    public void dispatch(RCTEventEmitter rctEventEmitter) {
+        rctEventEmitter.receiveEvent(getViewTag(), getEventName(), serializeEventData());
+    }
+
+    private WritableMap serializeEventData() {
+        WritableMap eventData = Arguments.createMap();
+        eventData.putInt("data", mValue);
+        return eventData;
+    }
+}
+
+。。。
+
+import com.facebook.react.common.MapBuilder;
+import java.util.Map;
+
+...
+
+@Override
+public Map getExportedCustomDirectEventTypeConstants() {
+    return MapBuilder.of(
+        ItemSelectedEvent.EVENT_NAME, MapBuilder.of("registrationName", "onChoosed")
+    );
+}
+
+...
+
+onChoosed={(e)=>{
+    console.log(e.nativeEvent.data);
+}}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+> zhui
+
+```
+getName : 该方法是暴露给 RN 端调用的名称
+createViewInstance : 该方法用来返回 PtrFrameLayout 的实例
+getCommandsMap : 接收 RN 发来的命令
+receiveCommand : 处理 RN 发来的命令
+
+addEventEmitters : 发送到 RN
+getExportedCustomDirectEventTypeConstants : 暴露给 RN (监听 PtrFrameLayout事件并回调到 RN 方法中)
+
+
+public class ReactPtrLayout extends ViewGroupManager<PtrFrameLayout> {
+
+    private static final int STOP_REFRESH=1;
+
+    @Override
+    public String getName() {
+        return "PtrFrameLayout";
+    }
+
+    @Override
+    protected PtrFrameLayout createViewInstance(ThemedReactContext reactContext) {
+        final PtrFrameLayout rootView= (PtrFrameLayout)LayoutInflater.from(reactContext).inflate(R.layout.ptr_layout,null);
+        return  rootView;
+    }
+
+    @Nullable
+    @Override
+    public Map<String, Integer> getCommandsMap() {
+        return MapBuilder.of("stop_refresh",STOP_REFRESH);
+    }
+
+    @Override
+    public void receiveCommand(PtrFrameLayout root, int commandId, @Nullable ReadableArray args) {
+        switch (commandId){
+            case STOP_REFRESH:
+                root.completeRefresh(PtrState.REFRESH_SUCCESS);
+                return;
+        }
+    }
+
+    @Override
+    protected void addEventEmitters(final ThemedReactContext reactContext, final PtrFrameLayout view) {
+        super.addEventEmitters(reactContext, view);
+        view.setOnRefreshListener(new PtrFrameLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                reactContext.getNativeModule(UIManagerModule.class).getEventDispatcher()
+                        .dispatchEvent(new RefreshEvent(view.getId(), SystemClock.nanoTime()));
+            }
+        });
+    }
+
+    @Override
+    public Map<String, Object> getExportedCustomDirectEventTypeConstants() {
+        return MapBuilder.<String, Object>builder()
+                .put("topRefresh", MapBuilder.of("registrationName", "onRefresh"))
+                .build();
+    }
+
+
+}
+
+```

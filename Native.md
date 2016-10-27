@@ -54,9 +54,12 @@ import com.facebook.react.bridge.Promise;
 
 import javax.annotation.Nullable;
 
+@ReactProp(name = "borderColor", customType = "Color")
 @ReactProp(name="maxVisibleValueCount",defaultInt = 50)
 
+
 @ReactMethod
+ public void login(String userName, String password, Promise promise)
 
 使用Promise比使用Callback更加的简洁，还能更加灵活的在多线程之间进行切换
 

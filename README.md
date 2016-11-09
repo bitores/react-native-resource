@@ -498,7 +498,24 @@ var {xxx} = require('./filepath');
 + Text中省略号属性： ellipsizeMode , 最新版本推出的属性, 显示不完全省略的位置, 一般配合numberOfLines 使用。 可选值'head', 'middle', 'tail', 'clip'， clip 只能在ios中使用, tail是默认值, 省略尾巴 显示方式如:”abcd…”
 
 
+#### Navigator跳转卡
 
++ [InteractionManager.runAfterInteractions](http://www.tuicool.com/articles/6JR36fV)
+
+```
+ 主要是在执行动画时，避免执行其他工作量比较大的代码，比如，最好不要一边渲染，一边执行动画，而是先执行动画，等动画执行结束后在渲染，可以setTimeout来延时执行渲染，最好是用官方推荐的做法，利用InteractionManager，下面是代码示例：
+
+  componentDidMount() {
+    InteractionManager.runAfterInteractions(() => {
+      this.setState({renderPlaceholderOnly: false});
+    });
+  }
+InteractionManager.runAfterInteractions是在动画或者操作结束后执行，还有其他两种方法：
+
+requestAnimationFrame(): H5的标准，RN实现了它，下一帧渲染时执行，更好的利用浏览器的刷新频率，避免丢帧。
+setImmediate/setTimeout(): 定时执行，有可能影响动画的流畅度。
+另外，这个项目里用了MPAndroidChart组件，我对MPAndroidChart做了桥接，有想用的用户可以试试这个项目：
+```
 
 #####[Android 使用 GIF](http://blog.csdn.net/codetomylaw/article/details/52692824)
 ```
